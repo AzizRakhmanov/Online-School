@@ -2,6 +2,7 @@
 using DAL.IRepository;
 using Domain.Commons;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 
 namespace DAL.Repository
@@ -19,30 +20,37 @@ namespace DAL.Repository
         public async ValueTask<Entity> CreateAsync(Entity entity)
         {
             await this._dbSet.AddAsync(entity);
+
             return entity;
         }
 
-        public async void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
             var dbEntity = await this.SelectAsync(id);
+
             this._dbSet.Remove(dbEntity);
+            await this._schoolDb.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Entity>> SelectAllAsync(Expression<Func<Entity, bool>> expression)
         {
             var allEntities = await this._dbSet.Where(expression).ToListAsync();
+
             return allEntities;
         }
 
         public async ValueTask<Entity> SelectAsync(Guid id)
         {
-            var dbEntity = await this._dbSet.FindAsync(id);
+            var dbEntity = await this._dbSet.FirstOrDefaultAsync(p => p.Id == id);
             return dbEntity;
         }
 
-        public void Update(Entity user)
+        public async Task Update(Entity entity)
         {
-            this._dbSet.Update(user);
+            var dbUser = await this.SelectAsync(entity.Id);
+
+            EntityEntry<Entity> entityEntry = this._schoolDb.Update(entity);
+            await this._schoolDb.SaveChangesAsync();
         }
 
         public async Task SaveAsync()
