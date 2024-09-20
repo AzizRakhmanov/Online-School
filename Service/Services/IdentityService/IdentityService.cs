@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Service.Contracts;
 using Service.Options;
@@ -20,7 +19,11 @@ namespace Service.Services.IdentityService
             this.jwtSettings = jwtSettings;
         }
 
-
+        /// <summary>
+        /// Method for generating token
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public AuthenticationResult GenerateAuthenticationResultForUser(IdentityUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -43,12 +46,17 @@ namespace Service.Services.IdentityService
             return new AuthenticationResult
             {
                 Success = true,
-                Token = tokenHandler.WriteToken(token),
-
+                Token = tokenHandler.WriteToken(token)
             };
         }
 
 
+        /// <summary>
+        /// Registeris the new user
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
             var existingUser = await this._userManager.FindByEmailAsync(email);
@@ -57,7 +65,7 @@ namespace Service.Services.IdentityService
             {
                 return new AuthenticationResult
                 {
-                    Errors = new[] { "User this email address already exists" }
+                    Errors = new[] { "User with this email address already exists" }
                 };
             }
 
@@ -67,21 +75,26 @@ namespace Service.Services.IdentityService
                 UserName = email
             };
 
+            var createdUser = await this._userManager.CreateAsync(newUser, password);
 
-            var userHasValidPassword = await this._userManager.CheckPasswordAsync(existingUser, password);
-
-            if (!userHasValidPassword)
+            if (!createdUser.Succeeded)
             {
-                return new AuthenticationResult
+                return new AuthenticationResult()
                 {
-                    Errors = new[] { "User/password combination is not correct" }
+                    Errors = createdUser.Errors.Select(x => x.Description)
                 };
             }
 
-            return GenerateAuthenticationResultForUser(existingUser);
+            return GenerateAuthenticationResultForUser(newUser);
         }
 
 
+        /// <summary>
+        /// Logins the user if user exists
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns>AuthenticationResult</returns>
         public async Task<AuthenticationResult> LoginAsync(string email, string password)
         {
             var user = await this._userManager.FindByEmailAsync(email);
@@ -90,16 +103,17 @@ namespace Service.Services.IdentityService
             {
                 return new AuthenticationResult()
                 {
-                    Errors = new[] {"User does not exist"}
+                    Errors = new[] { "User does not exist" }
                 };
             }
 
-            var userHasValidPassword = await this._userManager.CheckPasswordAsync(user,password);
+            var userHasValidPassword = await this._userManager.CheckPasswordAsync(user, password);
 
-            if (!userHasValidPassword) {
+            if (!userHasValidPassword)
+            {
                 return new AuthenticationResult()
                 {
-                    Errors = new[] {"User/password combination is wrong"}
+                    Errors = new[] { $"{email}/{password} combination is not found" }
                 };
             }
             return GenerateAuthenticationResultForUser(user);

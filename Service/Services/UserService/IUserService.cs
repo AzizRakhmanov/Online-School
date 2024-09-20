@@ -14,7 +14,7 @@ namespace Service.Services.UserService
 
         public Task Update(UserForCreationDto dto);
 
-        public Task<bool> UserOwnPostAsync(Guid userId,Guid getPostId);
+        //  public Task<bool> UserOwnPostAsync(Guid userId, Guid getPostId);
 
         public Task Delete(Guid id);
     }

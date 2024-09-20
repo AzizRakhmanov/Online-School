@@ -11,6 +11,8 @@ namespace Service.MapperProfile
             CreateMap<User, UserForCreationDto>().ReverseMap();
             CreateMap<User, UserForResultDto>().ReverseMap();
             CreateMap<UserForCreationDto, UserForResultDto>().ReverseMap();
+
+            CreateMap<IEnumerable<UserForResultDto>, IEnumerable<User>>();
         }
     }
 }

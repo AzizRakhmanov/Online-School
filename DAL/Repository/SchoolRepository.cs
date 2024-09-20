@@ -24,9 +24,9 @@ namespace DAL.Repository
             return entity;
         }
 
-        public async Task Delete(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
-            var dbEntity = await this.SelectAsync(id);
+            var dbEntity = await this._dbSet.FindAsync(id);
 
             this._dbSet.Remove(dbEntity);
             await this._schoolDb.SaveChangesAsync();
@@ -56,6 +56,11 @@ namespace DAL.Repository
         public async Task SaveAsync()
         {
             await this._schoolDb.SaveChangesAsync();
+        }
+
+        public async ValueTask<bool> ExistsAsync(Expression<Func<Entity, bool>> expression)
+        {
+            return await this._dbSet.AnyAsync(expression);
         }
     }
 }

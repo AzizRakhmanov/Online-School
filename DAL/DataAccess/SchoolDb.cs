@@ -5,12 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DAL.DataAccess
 {
-    public class SchoolDb : IdentityDbContext<IdentityUser>
+    public partial class SchoolDb : IdentityDbContext<IdentityUser>
     {
         public SchoolDb(DbContextOptions<SchoolDb> options)
             : base(options)
         { }
 
+        public SchoolDb() { }
+
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Course> Courses { get; set; }
     }
+
 }

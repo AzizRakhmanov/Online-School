@@ -3,14 +3,14 @@ using Service.Contracts;
 using Service.Options;
 using Service.Services.IdentityService;
 
-namespace OnlineSchoolCrm.Controllers.V1
+namespace OnlineSchoolCrm.Controllers
 {
     public class IdentityController : Controller
     {
         private readonly IIdentityService _identityService;
         public IdentityController(IIdentityService identityService)
         {
-            this._identityService = identityService;
+            _identityService = identityService;
         }
 
         /// <summary>
@@ -21,16 +21,12 @@ namespace OnlineSchoolCrm.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Register)]
         public async Task<IActionResult> Register([FromBody] UserRegistrationRequest request)
         {
-            var authResponse = await this._identityService.RegisterAsync(request.Email, request.Password);
-
             if (!ModelState.IsValid)
             {
-                return BadRequest(
-                    new AuthFailedResponse()
-                    {
-                        Errors = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
-                    });
+                return BadRequest(ModelState);
             }
+
+            var authResponse = await _identityService.RegisterAsync(request.Email, request.Password);
 
             if (!authResponse.Success)
             {
@@ -55,7 +51,13 @@ namespace OnlineSchoolCrm.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Login)]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest userLoginRequest)
         {
-            var authResponse = await this._identityService.LoginAsync(userLoginRequest.Email, userLoginRequest.Password);
+            if (!ModelState.IsValid)
+                return BadRequest(new AuthFailedResponse
+                {
+                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage))
+                });
+
+            var authResponse = await _identityService.LoginAsync(userLoginRequest.Email, userLoginRequest.Password);
 
             if (!authResponse.Success)
             {

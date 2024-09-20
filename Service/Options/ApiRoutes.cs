@@ -12,13 +12,13 @@
         {
             public const string GetAll = Base + "/" + "users";
 
-            public const string Get = Base + "/" + "users/{userId}";
+            public const string Get = Base + "/" + "users/{id}";
 
             public const string Create = Base + "/" + "users";
 
             public const string Delete = Base + "/" + "users";
 
-            public const string Update = Base + "/" + "users";  
+            public const string Update = Base + "/" + "users";
         }
 
         public static class Identity

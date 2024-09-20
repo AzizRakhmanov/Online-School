@@ -32,7 +32,7 @@ namespace Service.Services.UserService
 
         public async Task Delete(Guid id)
         {
-            await this._repository.Delete(id);
+            await this._repository.DeleteAsync(id);
             // await this._repository.SaveAsync();
         }
 
@@ -40,9 +40,7 @@ namespace Service.Services.UserService
         {
             var allDb = await this._repository.SelectAllAsync(expression);
 
-            var usersResultDto = this._mapper.Map<IEnumerable<UserForResultDto>>(allDb.OrderByDescending(p => p.BirthDate));
-
-            return usersResultDto;
+            return this._mapper.Map<IEnumerable<UserForResultDto>>(allDb.OrderByDescending(p => p.BirthDate));
         }
 
         public async ValueTask<UserForResultDto> RetrieveAsync(Guid id)
@@ -64,17 +62,17 @@ namespace Service.Services.UserService
             //await this._repository.SaveAsync();
         }
 
-        public async Task<bool> UserOwnPostAsync(Guid userId, Guid getPostId)
-        {
-            var user = await this._repository.SelectAsync(userId);
+        //public async Task<bool> UserOwnPostAsync(Guid userId,Guid getPostId)
+        //{
+        //    var user = await this._repository.SelectAsync(userId);
 
-            if(user == null)
-                return false;
+        //    if (user == null)
+        //        return false;
 
-            if (user.Id != userId)
-                return false;
+        //    if (user.Id != userId)
+        //        return false;
 
-            return true;
-        }
+        //    return true;
+        //}
     }
 }

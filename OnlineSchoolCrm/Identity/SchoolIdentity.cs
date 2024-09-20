@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
-using System.Data.Entity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace OnlineSchoolCrm.Identity
 {
