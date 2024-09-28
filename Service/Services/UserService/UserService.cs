@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DAL.IRepository;
 using Domain.Models;
+using Microsoft.AspNetCore.Identity;
 using Service.Dto;
 using System.Linq.Expressions;
 
@@ -10,6 +11,7 @@ namespace Service.Services.UserService
     public class UserService : IUserService
     {
         private readonly ISchoolRepository<User> _repository;
+        // private readonly ISchoolRepository<IdentityUser> _schoolIdentityRepository;
         private readonly IMapper _mapper;
 
         public UserService(ISchoolRepository<User> repository,
@@ -58,7 +60,7 @@ namespace Service.Services.UserService
 
             var dbUser = this._mapper.Map<User>(dto);
 
-            await this._repository.Update(dbUser);
+            await this._repository.UpdateAsync(dbUser);
             //await this._repository.SaveAsync();
         }
 

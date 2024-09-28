@@ -1,21 +1,28 @@
 ﻿using DAL.IRepository;
 using Domain.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Service.Services.CourseService
 {
     public class CourseService : ICourseService
     {
         private readonly ISchoolRepository<Course> _repository;
+        private readonly ICourseExtraRepository _courseExtraRepository;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public CourseService(ISchoolRepository<Course> repository)
+        public CourseService(ISchoolRepository<Course> repository,
+            ICourseExtraRepository courseExtraRepository,
+            UserManager<IdentityUser> userManager)
         {
             this._repository = repository;
+            this._courseExtraRepository = courseExtraRepository;
+            this._userManager = userManager;
         }
 
 
         public async Task<IEnumerable<Course>> GetAllAsync()
         {
-            var allCourses = await this._repository.SelectAllAsync(p => p != null);
+            var allCourses = await this._courseExtraRepository.SelectAllAsync(p => p != null);
             return allCourses;
         }
 
@@ -24,7 +31,7 @@ namespace Service.Services.CourseService
             if (id == Guid.Empty)
                 throw new Exception(message: "Id can't be null");
 
-            var dbCourse = await this._repository.SelectAsync(id);
+            var dbCourse = await  this._courseExtraRepository.SelectAsync(id);
 
             if (dbCourse is null)
                 return null;
@@ -34,17 +41,28 @@ namespace Service.Services.CourseService
 
         public async ValueTask<Course> AddAsync(Course course)
         {
-            if (course.Id == Guid.Empty)
-                course.Id = Guid.NewGuid();
+            var existingTeacher = await this._userManager.FindByIdAsync(course.TeacherId);
 
+            if (existingTeacher is null)
+                throw new Exception(message: "Teacher with this email address does not exist");
+
+            course.TeacherId = existingTeacher.Id;
             var dbResponse = await this._repository.CreateAsync(course);
 
             return dbResponse;
         }
 
-        public void Update(Course course)
+        public async Task<bool> UpdateAsync(Course course)
         {
-            throw new NotImplementedException();
+            if (course is null)
+                return false;
+
+            var entityExists = await this._repository.ExistsAsync(p => p.Id == course.Id);
+
+            if (!entityExists)
+                return false;
+
+            return await this._repository.UpdateAsync(course);
         }
 
         public async ValueTask<bool> DeleteAsync(Guid courseId)

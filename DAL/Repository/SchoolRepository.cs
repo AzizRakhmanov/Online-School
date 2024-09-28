@@ -1,13 +1,14 @@
 ﻿using DAL.DataAccess;
 using DAL.IRepository;
 using Domain.Commons;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 
 namespace DAL.Repository
 {
-    public class SchoolRepository<Entity> : ISchoolRepository<Entity> where Entity : Auditable
+    public partial class SchoolRepository<Entity> : ISchoolRepository<Entity> where Entity : Auditable
     {
         private readonly SchoolDb _schoolDb;
         private readonly DbSet<Entity> _dbSet;
@@ -20,16 +21,17 @@ namespace DAL.Repository
         public async ValueTask<Entity> CreateAsync(Entity entity)
         {
             await this._dbSet.AddAsync(entity);
+            await this._schoolDb.SaveChangesAsync();
 
             return entity;
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var dbEntity = await this._dbSet.FindAsync(id);
 
             this._dbSet.Remove(dbEntity);
-            await this._schoolDb.SaveChangesAsync();
+            return await this._schoolDb.SaveChangesAsync() > 0 ? true : false;
         }
 
         public async Task<IEnumerable<Entity>> SelectAllAsync(Expression<Func<Entity, bool>> expression)
@@ -45,12 +47,12 @@ namespace DAL.Repository
             return dbEntity;
         }
 
-        public async Task Update(Entity entity)
+        public async Task<bool> UpdateAsync(Entity entity)
         {
             var dbUser = await this.SelectAsync(entity.Id);
 
             EntityEntry<Entity> entityEntry = this._schoolDb.Update(entity);
-            await this._schoolDb.SaveChangesAsync();
+            return await this._schoolDb.SaveChangesAsync() > 0 ? true : false;
         }
 
         public async Task SaveAsync()
@@ -60,7 +62,7 @@ namespace DAL.Repository
 
         public async ValueTask<bool> ExistsAsync(Expression<Func<Entity, bool>> expression)
         {
-            return await this._dbSet.AnyAsync(expression);
+            return await this._dbSet.AsNoTracking().AnyAsync(expression);
         }
     }
 }

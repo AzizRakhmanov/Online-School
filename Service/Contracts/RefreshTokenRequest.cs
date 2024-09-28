@@ -1,6 +1,6 @@
 ﻿namespace Service.Contracts
 {
-    public class AuthSuccessResponse
+    public class RefreshTokenRequest
     {
         public string Token { get; set; }
 

@@ -14,7 +14,7 @@ namespace Domain.Models
 
         public string TeacherId { get; set; }
 
-        [ForeignKey("TeacherId")]
-        public IdentityUser Teacher { get; set; }
+        [ForeignKey(nameof(TeacherId))]
+        public ICollection<IdentityUser> Teacher { get; set; }
     }
 }

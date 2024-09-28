@@ -21,11 +21,27 @@
             public const string Update = Base + "/" + "users";
         }
 
+        public static class Courses
+        {
+            public const string GetAll = Base + "/" + "courses";
+
+            public const string Get = Base + "/" + "courses/{id}";
+
+            public const string Create = Base + "/" + "courses";
+
+            public const string Delete = Base + "/" + "courses";
+
+            public const string Update = Base + "/" + "courses";
+        }
+
         public static class Identity
         {
             public const string Login = Base + "/identity/login";
 
             public const string Register = Base + "/identity/register";
+
+            public const string Refresh = Base + "/identity/refresh";
+
         }
     }
 }

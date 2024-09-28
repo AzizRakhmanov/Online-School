@@ -91,7 +91,8 @@ namespace OnlineSchoolCrm.Controllers
             var baseUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var locationUri = baseUri + $"/" + ApiRoutes.Users.GetAll.Replace("userId", user.Id.ToString());
 
-            return CreatedAtAction(locationUri, user);
+            return Ok(user);
+         //   return CreatedAtAction(locationUri, user);
         }
 
         [HttpDelete(ApiRoutes.Users.Delete)]

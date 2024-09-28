@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.IdentityModel.Tokens;
 using Service.Contracts;
 using Service.Options;
@@ -12,11 +13,15 @@ namespace Service.Services.IdentityService
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly JwtSettings jwtSettings;
+        private readonly TokenValidationParameters _tokenValidationParameters;
 
-        public IdentityService(UserManager<IdentityUser> userManager, JwtSettings jwtSettings)
+        public IdentityService(UserManager<IdentityUser> userManager,
+            JwtSettings jwtSettings,
+            TokenValidationParameters tokenValidationParamaters)
         {
             this._userManager = userManager;
             this.jwtSettings = jwtSettings;
+            this._tokenValidationParameters = tokenValidationParamaters;    
         }
 
         /// <summary>
@@ -30,15 +35,16 @@ namespace Service.Services.IdentityService
             var key = Encoding.ASCII.GetBytes(this.jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new System.Security.Claims.ClaimsIdentity(new[]
+                Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Sub,user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Email,user.Email),
                     new Claim("id",user.Id)
                 }),
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                Expires = DateTime.UtcNow.AddHours(8),
+                //Expires = DateTime.UtcNow.Add(jwtSettings.TokenLifeTime),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -117,6 +123,42 @@ namespace Service.Services.IdentityService
                 };
             }
             return GenerateAuthenticationResultForUser(user);
+        }
+
+        public Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
+        {
+            return null;
+        }
+
+        private ClaimsPrincipal GetPrincipalFromToken(string token)
+        {
+            return new ClaimsPrincipal();
+            //var tokenHandler = new JwtSecurityTokenHandler();
+
+            //try
+            //{
+            //    var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
+
+            //    if (!IsJwtWithValidSecurityALgorithm(validatedToken))
+            //    {
+            //        return null;
+            //    }
+
+            //    return principal;
+            //}
+            //catch
+            //{
+            //    return null;
+            //}
+
+            //return null;
+        }
+
+        private bool IsJwtWithValidSecurityALgorithm(SecurityToken validatedToken)
+        {
+            return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
+                jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

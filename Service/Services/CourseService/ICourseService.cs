@@ -10,7 +10,7 @@ namespace Service.Services.CourseService
 
         public ValueTask<Course> AddAsync(Course course);
 
-        public void Update(Course course);
+        public Task<bool> UpdateAsync(Course course);
 
         public ValueTask<bool> DeleteAsync(Guid id);
 
