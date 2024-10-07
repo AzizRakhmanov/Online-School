@@ -12,10 +12,12 @@ namespace DAL.IRepository
 
         public ValueTask<Entity> CreateAsync(Entity user);
 
-        public void Delete(Guid id);
+        public Task<bool> DeleteAsync(Guid id);
 
-        public void Update(Entity user);
+        public Task<bool> UpdateAsync(Entity user);
 
         public Task SaveAsync();
+
+        public ValueTask<bool> ExistsAsync(Expression<Func<Entity, bool>> expression);
     }
 }

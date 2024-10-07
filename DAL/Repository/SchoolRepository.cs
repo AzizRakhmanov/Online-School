@@ -1,12 +1,14 @@
 ﻿using DAL.DataAccess;
 using DAL.IRepository;
 using Domain.Commons;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 
 namespace DAL.Repository
 {
-    public class SchoolRepository<Entity> : ISchoolRepository<Entity> where Entity : Auditable
+    public partial class SchoolRepository<Entity> : ISchoolRepository<Entity> where Entity : Auditable
     {
         private readonly SchoolDb _schoolDb;
         private readonly DbSet<Entity> _dbSet;
@@ -19,35 +21,48 @@ namespace DAL.Repository
         public async ValueTask<Entity> CreateAsync(Entity entity)
         {
             await this._dbSet.AddAsync(entity);
+            await this._schoolDb.SaveChangesAsync();
+
             return entity;
         }
 
-        public async void Delete(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
-            var dbEntity = await this.SelectAsync(id);
+            var dbEntity = await this._dbSet.FindAsync(id);
+
             this._dbSet.Remove(dbEntity);
+            return await this._schoolDb.SaveChangesAsync() > 0 ? true : false;
         }
 
         public async Task<IEnumerable<Entity>> SelectAllAsync(Expression<Func<Entity, bool>> expression)
         {
             var allEntities = await this._dbSet.Where(expression).ToListAsync();
+
             return allEntities;
         }
 
         public async ValueTask<Entity> SelectAsync(Guid id)
         {
-            var dbEntity = await this._dbSet.FindAsync(id);
+            var dbEntity = await this._dbSet.FirstOrDefaultAsync(p => p.Id == id);
             return dbEntity;
         }
 
-        public void Update(Entity user)
+        public async Task<bool> UpdateAsync(Entity entity)
         {
-            this._dbSet.Update(user);
+            var dbUser = await this.SelectAsync(entity.Id);
+
+            EntityEntry<Entity> entityEntry = this._schoolDb.Update(entity);
+            return await this._schoolDb.SaveChangesAsync() > 0 ? true : false;
         }
 
         public async Task SaveAsync()
         {
             await this._schoolDb.SaveChangesAsync();
+        }
+
+        public async ValueTask<bool> ExistsAsync(Expression<Func<Entity, bool>> expression)
+        {
+            return await this._dbSet.AsNoTracking().AnyAsync(expression);
         }
     }
 }

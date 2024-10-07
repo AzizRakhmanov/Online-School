@@ -1,33 +1,46 @@
-﻿using DAL.DataAccess;
+﻿using AutoMapper;
+using DAL.DataAccess;
+using DAL.IRepository;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.Dto;
+using Service.Extensions;
+using Service.Options;
+using Service.Services.UserService;
 
 namespace OnlineSchoolCrm.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
         private readonly SchoolDb _context;
+        private IUserService _userService;
+        private readonly IMapper _mapper;
+        private readonly ISchoolRepository<User> _repository;
 
-        public UsersController(SchoolDb context)
+        public UsersController(SchoolDb context,
+            IUserService userService
+           , IMapper mapper
+           , ISchoolRepository<User> repository)
         {
             _context = context;
+            _userService = userService;
+            _mapper = mapper;
+            _repository = repository;
         }
 
-        // GET: api/Users
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+
+        [HttpGet(ApiRoutes.Users.GetAll)]
+        public async Task<IEnumerable<UserForResultDto>> AllUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _userService.RetrieveAllAsync(p => p.Id != Guid.Empty);
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+        [HttpGet(ApiRoutes.Users.Get)]
+        public async Task<ActionResult<UserForResultDto>> GetUser(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.RetrieveAsync(id);
 
             if (user == null)
             {
@@ -37,24 +50,25 @@ namespace OnlineSchoolCrm.Controllers
             return user;
         }
 
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(Guid id, User user)
+        [HttpPut(ApiRoutes.Users.Update)]
+        public async Task<IActionResult> UpdateAsync(UserForCreationDto user)
         {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
+            // var userOwns = await _userService.UserOwnPostAsync(user.Id, new Guid(HttpContext.GetUserId()));
 
-            _context.Entry(user).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                var dbUser = await _userService.RetrieveAsync(user.Id);
+
+
+                if (dbUser is null)
+                    return NotFound();
+
+                await _userService.Update(user);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!UserExists(user.Id))
                 {
                     return NotFound();
                 }
@@ -67,29 +81,30 @@ namespace OnlineSchoolCrm.Controllers
             return NoContent();
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        [HttpPost(ApiRoutes.Users.Create)]
+        public async Task<ActionResult> CreateAsync([FromBody] UserForCreationDto user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            user.UserId = HttpContext.GetUserId();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            await _userService.AddAsync(user);
+
+            var baseUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
+            var locationUri = baseUri + $"/" + ApiRoutes.Users.GetAll.Replace("userId", user.Id.ToString());
+
+            return Ok(user);
+         //   return CreatedAtAction(locationUri, user);
         }
 
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
+        [HttpDelete(ApiRoutes.Users.Delete)]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.RetrieveAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            await _userService.Delete(id);
 
             return NoContent();
         }

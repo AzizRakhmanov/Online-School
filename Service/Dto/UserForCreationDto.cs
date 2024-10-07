@@ -1,11 +1,11 @@
-﻿using Domain.Commons;
-using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Identity;
 
-namespace Domain.Models
+namespace Service.Dto
 {
-    public class User : Auditable
+    public class UserForCreationDto
     {
+        public Guid Id { get; set; }
+
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
@@ -18,7 +18,6 @@ namespace Domain.Models
 
         public string UserId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
         public IdentityUser IdentityUser { get; set; }
     }
 }
