@@ -1,7 +1,6 @@
 ﻿using DAL.DataAccess;
 using DAL.IRepository;
 using Domain.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -24,7 +23,7 @@ namespace DAL.Repository
         }
         public async Task<Course> SelectAsync(Guid id)
         {
-            var courseWithItsTeacher = await  this._schoolDb.Courses.AsNoTracking().Include(p => p.Teacher).FirstOrDefaultAsync(p => p.Id == id);
+            var courseWithItsTeacher = await this._schoolDb.Courses.AsNoTracking().Include(p => p.Teacher).FirstOrDefaultAsync(p => p.Id == id);
 
             return courseWithItsTeacher;
         }

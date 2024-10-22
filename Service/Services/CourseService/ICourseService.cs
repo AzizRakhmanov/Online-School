@@ -4,7 +4,7 @@ namespace Service.Services.CourseService
 {
     public interface ICourseService
     {
-        public Task<IEnumerable<Course>> GetAllAsync();
+        public IEnumerable<Course> GetAll();
 
         public ValueTask<Course> GetAsync(Guid id);
 
@@ -14,6 +14,5 @@ namespace Service.Services.CourseService
 
         public ValueTask<bool> DeleteAsync(Guid id);
 
-        public Task<bool> UserOwnsCourseAsync(Guid courseId, string getUserId);
     }
 }

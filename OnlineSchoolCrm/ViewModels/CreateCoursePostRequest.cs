@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace OnlineSchoolCrm.ViewModels
+﻿namespace OnlineSchoolCrm.ViewModels
 {
     public class CreateCoursePostRequest
     {

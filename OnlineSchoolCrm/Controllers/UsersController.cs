@@ -17,12 +17,12 @@ namespace OnlineSchoolCrm.Controllers
         private readonly SchoolDb _context;
         private IUserService _userService;
         private readonly IMapper _mapper;
-        private readonly ISchoolRepository<User> _repository;
+        private readonly IRepository<User> _repository;
 
         public UsersController(SchoolDb context,
             IUserService userService
            , IMapper mapper
-           , ISchoolRepository<User> repository)
+           , IRepository<User> repository)
         {
             _context = context;
             _userService = userService;
@@ -32,9 +32,9 @@ namespace OnlineSchoolCrm.Controllers
 
 
         [HttpGet(ApiRoutes.Users.GetAll)]
-        public async Task<IEnumerable<UserForResultDto>> AllUsers()
+        public IEnumerable<UserForResultDto> AllUsers()
         {
-            return await _userService.RetrieveAllAsync(p => p.Id != Guid.Empty);
+            return _userService.RetrieveAll(p => p.Id != Guid.Empty);
         }
 
         [HttpGet(ApiRoutes.Users.Get)]
@@ -64,7 +64,7 @@ namespace OnlineSchoolCrm.Controllers
                 if (dbUser is null)
                     return NotFound();
 
-                await _userService.Update(user);
+                _userService.Update(user);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -92,7 +92,7 @@ namespace OnlineSchoolCrm.Controllers
             var locationUri = baseUri + $"/" + ApiRoutes.Users.GetAll.Replace("userId", user.Id.ToString());
 
             return Ok(user);
-         //   return CreatedAtAction(locationUri, user);
+            //   return CreatedAtAction(locationUri, user);
         }
 
         [HttpDelete(ApiRoutes.Users.Delete)]

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Service.Contracts
+namespace Service.Contracts.Requests
 {
-    public class UserLoginRequest
+    public class UserRegistrationRequest
     {
         [EmailAddress]
         public string Email { get; set; }

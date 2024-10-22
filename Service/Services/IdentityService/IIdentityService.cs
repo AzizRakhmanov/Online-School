@@ -1,13 +1,11 @@
-﻿using Service.Contracts;
+﻿using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 
 namespace Service.Services.IdentityService
 {
     public interface IIdentityService
     {
-        Task<AuthenticationResult> RegisterAsync(string email, string password);
-
-        Task<AuthenticationResult> LoginAsync(string email, string password);
-
-        Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken);
+        public Task<AuthenticationResult> LoginAsync(string email, string password);
+        public Task<AuthenticationResult> RegisterAsync(UserRegistrationRequest request);
     }
 }

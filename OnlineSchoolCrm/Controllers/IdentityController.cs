@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Service.Contracts;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 using Service.Options;
 using Service.Services.IdentityService;
 
@@ -26,7 +27,7 @@ namespace OnlineSchoolCrm.Controllers
                 return BadRequest(ModelState);
             }
 
-            var authResponse = await _identityService.RegisterAsync(request.Email, request.Password);
+            var authResponse = await _identityService.RegisterAsync(request);
 
             if (!authResponse.Success)
             {
@@ -74,30 +75,30 @@ namespace OnlineSchoolCrm.Controllers
             });
         }
 
-        [HttpPost(ApiRoutes.Identity.Refresh)]
-        public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(new AuthFailedResponse
-                {
-                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage))
-                });
+        //[HttpPost(ApiRoutes.Identity.Refresh)]
+        //public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(new AuthFailedResponse
+        //        {
+        //            Errors = ModelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage))
+        //        });
 
-            var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken);
+        //    var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken);
 
-            if (!authResponse.Success)
-            {
-                return BadRequest(new AuthFailedResponse()
-                {
-                    Errors = authResponse.Errors
-                });
-            }
+        //    if (!authResponse.Success)
+        //    {
+        //        return BadRequest(new AuthFailedResponse()
+        //        {
+        //            Errors = authResponse.Errors
+        //        });
+        //    }
 
-            return Ok(new AuthSuccessResponse()
-            {
-                Token = authResponse.Token,
-                RefreshToken = authResponse.RefreshToken
-            });
-        }
+        //    return Ok(new AuthSuccessResponse()
+        //    {
+        //        Token = authResponse.Token,
+        //        RefreshToken = authResponse.RefreshToken
+        //    });
+        //}
     }
 }

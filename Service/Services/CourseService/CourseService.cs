@@ -6,23 +6,20 @@ namespace Service.Services.CourseService
 {
     public class CourseService : ICourseService
     {
-        private readonly ISchoolRepository<Course> _repository;
-        private readonly ICourseExtraRepository _courseExtraRepository;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IRepository<Course> _repository;
+        private readonly UserManager<IdentityUser>  _userManager;
 
-        public CourseService(ISchoolRepository<Course> repository,
-            ICourseExtraRepository courseExtraRepository,
+        public CourseService(IRepository<Course> repository,
             UserManager<IdentityUser> userManager)
         {
             this._repository = repository;
-            this._courseExtraRepository = courseExtraRepository;
             this._userManager = userManager;
         }
 
-
-        public async Task<IEnumerable<Course>> GetAllAsync()
+        public IEnumerable<Course> GetAll()
         {
-            var allCourses = await this._courseExtraRepository.SelectAllAsync(p => p != null);
+            var includes = new string[] { "Teacher" };
+            var allCourses = this._repository.SelectAll(p => p.Id != Guid.Empty, includes);
             return allCourses;
         }
 
@@ -31,7 +28,7 @@ namespace Service.Services.CourseService
             if (id == Guid.Empty)
                 throw new Exception(message: "Id can't be null");
 
-            var dbCourse = await  this._courseExtraRepository.SelectAsync(id);
+            var dbCourse = await this._repository.SelectAsync(p => p.Id == id);
 
             if (dbCourse is null)
                 return null;
@@ -43,11 +40,10 @@ namespace Service.Services.CourseService
         {
             var existingTeacher = await this._userManager.FindByIdAsync(course.TeacherId);
 
-            if (existingTeacher is null)
+            if (existingTeacher == null)
                 throw new Exception(message: "Teacher with this email address does not exist");
 
-            course.TeacherId = existingTeacher.Id;
-            var dbResponse = await this._repository.CreateAsync(course);
+            var dbResponse = await this._repository.InsertAsync(course);
 
             return dbResponse;
         }
@@ -57,40 +53,20 @@ namespace Service.Services.CourseService
             if (course is null)
                 return false;
 
-            var entityExists = await this._repository.ExistsAsync(p => p.Id == course.Id);
+            var entity = await this._repository.SelectAsync(p => p.Id == course.Id);
 
-            if (!entityExists)
+            if (entity is null)
                 return false;
 
-            return await this._repository.UpdateAsync(course);
+            return this._repository.Update(course) != null ? false : true;
         }
 
-        public async ValueTask<bool> DeleteAsync(Guid courseId)
+        public async ValueTask<bool> DeleteAsync(Guid id)
         {
-            if (courseId == Guid.Empty)
+            if (id == Guid.Empty)
                 return false;
 
-            await this._repository.DeleteAsync(courseId);
-
-            var deleted = await this._repository.ExistsAsync(p => p.Id == courseId);
-
-            if (deleted) return false;
-
-            return true;
-        }
-
-        public async Task<bool> UserOwnsCourseAsync(Guid courseId, string userId)
-        {
-            var course = await this._repository.SelectAsync(courseId);
-
-            if (course == null)
-                return false;
-
-            if (course.TeacherId != userId)
-                return false;
-
-            return true;
-
+            return await this._repository.DeleteAsync(p => p.Id == id);
         }
     }
 }

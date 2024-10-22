@@ -10,9 +10,9 @@ namespace Service.Services.UserService
 
         public ValueTask<UserForResultDto> RetrieveAsync(Guid id);
 
-        public Task<IEnumerable<UserForResultDto>> RetrieveAllAsync(Expression<Func<User, bool>> expression);
+        public IEnumerable<UserForResultDto> RetrieveAll(Expression<Func<User, bool>> expression);
 
-        public Task Update(UserForCreationDto dto);
+        public void Update(UserForCreationDto dto);
 
         //  public Task<bool> UserOwnPostAsync(Guid userId, Guid getPostId);
 

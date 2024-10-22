@@ -1,4 +1,4 @@
-﻿namespace Service.Contracts
+﻿namespace Service.Contracts.Requests
 {
     public class RefreshTokenRequest
     {

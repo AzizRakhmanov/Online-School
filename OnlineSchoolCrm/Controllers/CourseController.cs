@@ -1,4 +1,6 @@
 ﻿using Domain.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSchoolCrm.ViewModels;
 using OnlineSchoolCrm.ViewModels.CourseModel;
@@ -8,9 +10,9 @@ using Service.Services.CourseService;
 
 namespace OnlineSchoolCrm.Controllers
 {
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-   // [Route("api/[controller]")]
-   // [ApiController]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    // [Route("api/[controller]")]
+    // [ApiController]
     public class CourseController : Controller
     {
         private readonly ICourseService courseService;
@@ -21,9 +23,9 @@ namespace OnlineSchoolCrm.Controllers
         }
         // GET: api/<CourseController>
         [HttpGet(ApiRoutes.Courses.GetAll)]
-        public async Task<IActionResult> GetAll()
+        public IActionResult GetAll()
         {
-            var all = await this.courseService.GetAllAsync();
+            var all = this.courseService.GetAll();
             return Ok(all);
         }
 
@@ -55,8 +57,8 @@ namespace OnlineSchoolCrm.Controllers
 
                 var result = await this.courseService.AddAsync(course);
 
-                var baseUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
-                var locationUri = baseUri + "/" + ApiRoutes.Courses.Get.Replace("{courseId}", course.Id.ToString());
+                //var baseUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
+                //var locationUri = baseUri + "/" + ApiRoutes.Courses.Get.Replace("{courseId}", course.Id.ToString());
 
                 return Ok(result);
             }

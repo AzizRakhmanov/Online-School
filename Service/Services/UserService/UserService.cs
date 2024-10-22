@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using DAL.IRepository;
 using Domain.Models;
-using Microsoft.AspNetCore.Identity;
 using Service.Dto;
 using System.Linq.Expressions;
 
@@ -10,11 +9,11 @@ namespace Service.Services.UserService
 
     public class UserService : IUserService
     {
-        private readonly ISchoolRepository<User> _repository;
+        private readonly IRepository<User> _repository;
         // private readonly ISchoolRepository<IdentityUser> _schoolIdentityRepository;
         private readonly IMapper _mapper;
 
-        public UserService(ISchoolRepository<User> repository,
+        public UserService(IRepository<User> repository,
             IMapper maperProfile)
         {
             this._repository = repository;
@@ -26,41 +25,40 @@ namespace Service.Services.UserService
 
             var dbUser = this._mapper.Map<User>(dto);
 
-            await this._repository.CreateAsync(dbUser);
-            await this._repository.SaveAsync();
+            await this._repository.InsertAsync(dbUser);
 
             return this._mapper.Map<UserForResultDto>(dto);
         }
 
         public async Task Delete(Guid id)
         {
-            await this._repository.DeleteAsync(id);
+            await this._repository.DeleteAsync(p => p.Id == id);
             // await this._repository.SaveAsync();
         }
 
-        public async Task<IEnumerable<UserForResultDto>> RetrieveAllAsync(Expression<Func<User, bool>> expression)
+        public IEnumerable<UserForResultDto> RetrieveAll(Expression<Func<User, bool>> expression)
         {
-            var allDb = await this._repository.SelectAllAsync(expression);
+            var allDb = this._repository.SelectAll(expression, new string[] { "Teacher" });
 
             return this._mapper.Map<IEnumerable<UserForResultDto>>(allDb.OrderByDescending(p => p.BirthDate));
         }
 
         public async ValueTask<UserForResultDto> RetrieveAsync(Guid id)
         {
-            var dbUser = await this._repository.SelectAsync(id);
+            var dbUser = await this._repository.SelectAsync(p => p.Id == id);
 
             var resultUser = this._mapper.Map<UserForResultDto>(dbUser);
 
             return resultUser;
         }
 
-        public async Task Update(UserForCreationDto dto)
+        public void Update(UserForCreationDto dto)
         {
             if (dto is null) throw new NullReferenceException();
 
             var dbUser = this._mapper.Map<User>(dto);
 
-            await this._repository.UpdateAsync(dbUser);
+            this._repository.Update(dbUser);
             //await this._repository.SaveAsync();
         }
 
