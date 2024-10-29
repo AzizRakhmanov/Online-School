@@ -38,14 +38,14 @@ namespace Service.Services.UserService
 
         public IEnumerable<UserForResultDto> RetrieveAll(Expression<Func<User, bool>> expression)
         {
-            var allDb = this._repository.SelectAll(expression, new string[] { "Teacher" });
+            var allDb = this._repository.SelectAll(expression, new string[] { "IdentityUser" });
 
             return this._mapper.Map<IEnumerable<UserForResultDto>>(allDb.OrderByDescending(p => p.BirthDate));
         }
 
         public async ValueTask<UserForResultDto> RetrieveAsync(Guid id)
         {
-            var dbUser = await this._repository.SelectAsync(p => p.Id == id);
+            var dbUser = await this._repository.SelectAsync(p => p.Id == id,new string[] { "IdentityUser"});
 
             var resultUser = this._mapper.Map<UserForResultDto>(dbUser);
 
